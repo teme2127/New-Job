@@ -1,3 +1,6 @@
 {
-  "rootDirectory": "my-job-board"
+  "build": {
+    "src": "my-job-board/package.json",
+    "use": "@vercel/next"
+  }
 }
