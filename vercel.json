@@ -1,4 +1,5 @@
 {
+  "name": "new-job",
   "builds": [
     {
       "src": "my-job-board/package.json",
