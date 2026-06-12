@@ -1,13 +1,13 @@
 // components/JobsSearchPortal.js
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import ApplyModal from "./ApplyModal";
 
 export default function JobsSearchPortal({ initialJobs }) {
   const [jobs, setJobs] = useState(initialJobs || []);
-  const [selectedJob, setSelectedJob] = useState(null);
+  const [selectedJob, setSelectedJob] = useState(() => (initialJobs && initialJobs.length > 0 ? initialJobs[0] : null));
   
   // Filters state
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,12 +15,6 @@ export default function JobsSearchPortal({ initialJobs }) {
   const [selectedType, setSelectedType] = useState("");
   const [selectedExperience, setSelectedExperience] = useState("");
   const [selectedLocation, setSelectedLocation] = useState("");
-
-  useEffect(() => {
-    if (jobs.length > 0 && !selectedJob) {
-      setSelectedJob(jobs[0]);
-    }
-  }, [jobs]);
 
   // Filter jobs dynamically
   const filteredJobs = jobs.filter((job) => {

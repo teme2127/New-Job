@@ -1,7 +1,7 @@
 // app/login/page.js
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -10,13 +10,7 @@ function LoginFormContent() {
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [submitState, setSubmitState] = useState({ loading: false, error: "", success: false });
-  const [signedUpMsg, setSignedUpMsg] = useState(false);
-
-  useEffect(() => {
-    if (searchParams.get("signup_success") === "true") {
-      setSignedUpMsg(true);
-    }
-  }, [searchParams]);
+  const [signedUpMsg, setSignedUpMsg] = useState(() => searchParams.get("signup_success") === "true");
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -55,7 +55,7 @@ export default async function Home() {
             </h1>
             
             <p className="mt-4 text-sm text-muted leading-relaxed max-w-xl">
-              EthioWork is Ethiopia's premier career marketplace. Browse recent vacancies in international NGOs, banks, trading sectors, and agricultural firms.
+              EthioWork is Ethiopia&apos;s premier career marketplace. Browse recent vacancies in international NGOs, banks, trading sectors, and agricultural firms.
             </p>
 
             {/* Ethiojobs Style Double Search Box */}

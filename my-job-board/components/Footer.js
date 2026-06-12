@@ -19,7 +19,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-xs text-muted leading-relaxed">
-              Ethiopia's modern job directory connecting top talent with NGOs, banking institutions, government agencies, and trading enterprises.
+              Ethiopia&apos;s modern job directory connecting top talent with NGOs, banking institutions, government agencies, and trading enterprises.
             </p>
           </div>
 
