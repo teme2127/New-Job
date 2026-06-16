@@ -9,6 +9,7 @@ export default function SignupPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({ name: "", email: "", password: "", role: "candidate" });
   const [submitState, setSubmitState] = useState({ loading: false, error: "", success: false });
+  const [verificationSent, setVerificationSent] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,10 +27,11 @@ export default function SignupPage() {
 
       if (res.ok) {
         setSubmitState({ loading: false, error: "", success: true });
-        // Redirect to login page after short delay
-        setTimeout(() => {
-          router.push("/login?signup_success=true");
-        }, 1500);
+        // Send verification email
+        fetch(`/api/auth/send-verification?email=${encodeURIComponent(formData.email)}`)
+          .then(() => setVerificationSent(true))
+          .catch(() => console.error('Failed to send verification email'));
+        // No immediate redirect; wait for verification
       } else {
         setSubmitState({ loading: false, error: data.error || "Signup failed.", success: false });
       }
@@ -66,9 +68,19 @@ export default function SignupPage() {
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white px-6 py-8 shadow-sm rounded-xl border border-border sm:px-10">
           <form className="space-y-4" onSubmit={handleSubmit}>
-            {submitState.success && (
+            {submitState.success && !verificationSent && (
               <div className="bg-emerald-50 text-emerald-800 text-xs p-2.5 rounded border border-emerald-200">
-                🎉 Account created! Redirecting to login portal...
+                🎉 Account created! Sending verification email...
+              </div>
+            )}
+            {verificationSent && (
+              <div className="bg-emerald-50 text-emerald-800 text-xs p-2.5 rounded border border-emerald-200">
+                ✅ Verification email sent! Please check your inbox and click the link.
+                <div className="mt-2">
+                  <Link href="/login" className="font-semibold text-primary hover:underline">
+                    Go to Login after verification
+                  </Link>
+                </div>
               </div>
             )}
 
