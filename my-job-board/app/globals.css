@@ -2,17 +2,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #fbfcfb;
+  --foreground: #1e293b;
   --card: #ffffff;
-  --card-foreground: #0f172a;
-  --primary: #1b4332; /* Ethiojobs Forest Green */
+  --card-foreground: #1e293b;
+  --primary: #009A44; /* Vibrant Ethiojobs flag green */
   --primary-foreground: #ffffff;
-  --secondary: #2d6a4f; /* Medium Green */
+  --secondary: #134931; /* Dark Ethiojobs brand forest green */
   --secondary-foreground: #ffffff;
-  --accent: #2b6cb0; /* Ethiojobs Royal Blue Accent */
-  --accent-foreground: #ffffff;
-  --muted: #475569;
+  --accent: #fcd116; /* Gold / Yellow highlight */
+  --accent-foreground: #1e293b;
+  --accent-red: #da291c; /* Ethiopian flag red */
+  --accent-blue: #0284c7; /* Sky blue action */
+  --muted: #64748b;
   --muted-foreground: #94a3b8;
   --border: #e2e8f0;
 }
@@ -28,6 +30,8 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-red: var(--accent-red);
+  --color-accent-blue: var(--accent-blue);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);

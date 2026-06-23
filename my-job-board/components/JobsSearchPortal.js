@@ -171,24 +171,29 @@ export default function JobsSearchPortal({ initialJobs }) {
                 <div
                   key={job._id || job.id}
                   onClick={() => handleJobSelect(job)}
-                  className={`group relative p-4 rounded-xl border transition-all duration-200 cursor-pointer flex justify-between items-start ${
+                  className={`group relative p-4 rounded-xl border transition-all duration-200 cursor-pointer flex justify-between items-start custom-shadow ${
                     isSelected
                       ? "bg-white border-primary shadow shadow-primary/5"
                       : "bg-white border-border hover:border-slate-300 hover:shadow-sm"
                   }`}
                 >
-                  <div className="space-y-1.5 max-w-[80%]">
+                  {/* Left indicator accent line */}
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 transition-colors rounded-l-xl ${
+                    isSelected ? "bg-primary" : "bg-primary/20 group-hover:bg-primary"
+                  }`}></div>
+
+                  <div className="space-y-1.5 max-w-[80%] pl-1">
                     {/* Top Company Row */}
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold text-foreground truncate">{job.company}</span>
-                      <span className="text-[8px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                      <span className="text-[10px] font-extrabold text-secondary truncate">{job.company}</span>
+                      <span className="text-[8px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-extrabold uppercase tracking-wider">
                         {job.type}
                       </span>
                     </div>
 
                     {/* Job Title */}
-                    <h3 className={`text-xs font-bold transition-colors truncate ${
-                      isSelected ? "text-primary font-extrabold" : "text-foreground group-hover:text-primary"
+                    <h3 className={`text-xs font-black transition-colors truncate ${
+                      isSelected ? "text-primary font-black" : "text-foreground group-hover:text-primary"
                     }`}>
                       {job.title}
                     </h3>
@@ -196,11 +201,11 @@ export default function JobsSearchPortal({ initialJobs }) {
                     {/* Location and Salary */}
                     <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-muted">
                       <span className="flex items-center gap-1">📍 {job.location}</span>
-                      <span className="font-semibold text-primary">💵 {job.salary}</span>
+                      <span className="font-bold text-primary">💵 {job.salary}</span>
                     </div>
                   </div>
 
-                  <div className={`h-8 w-8 rounded-lg flex items-center justify-center font-bold text-sm border border-slate-100 ${job.logoBg || "bg-primary/5 text-primary"}`}>
+                  <div className={`h-9 w-9 rounded-xl flex items-center justify-center font-bold text-base border border-slate-100/50 ${job.logoBg || "bg-primary/5 text-primary"}`}>
                     {job.logo || "💼"}
                   </div>
                 </div>
