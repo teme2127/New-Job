@@ -10,7 +10,18 @@
       "password": "92ce1b2e6d5a1331ac32769baa68af2a:0f83d95540bce9df02162fecc4186802103c9846432f89acc5380f283009b87e6572dfd904332b3577a20a79ecf4b9c085a31ac0e69cee8610ff99d6d53d121f",
       "role": "candidate"
     }
-  ],
+      },
+      {
+        "id": "a1b2c3d4e5f6a7b8c9d0e1f2",
+        "_id": "a1b2c3d4e5f6a7b8c9d0e1f2",
+        "createdAt": "2026-06-23T15:02:00.000Z",
+        "updatedAt": "2026-06-23T15:02:00.000Z",
+        "name": "Temes Gensisay",
+        "email": "temesgensisay16@gmail.com",
+        "password": "b8d353c37627ddf08142530eb3cce53c:4070f7462366119ffde3964a5f5dd7b55d61da45860611ca6a0c16854a9a076281dd67ba79ad9c408df86cf325d4366f579da2df2cb9c59f8162da9eb38323bb",
+        "role": "candidate"
+      }
+    ],
   "jobs": [
     {
       "id": "80c6616201c6e0610c57db50",
