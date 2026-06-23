@@ -21,13 +21,24 @@ if (!cached) {
 }
 
 async function dbConnect() {
+  if (global.useMockDb) {
+    return { isMock: true };
+  }
+
   if (cached.conn) {
     return cached.conn;
+  }
+
+  if (MONGODB_URI.includes("<db_password>")) {
+    console.warn("MongoDB connection URI contains placeholder <db_password>. Switching to local mock database.");
+    global.useMockDb = true;
+    return { isMock: true };
   }
 
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 3000,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongooseInstance) => {
@@ -39,7 +50,9 @@ async function dbConnect() {
     cached.conn = await cached.promise;
   } catch (e) {
     cached.promise = null;
-    throw e;
+    console.warn("MongoDB connection failed, falling back to local mock database:", e.message);
+    global.useMockDb = true;
+    return { isMock: true };
   }
 
   return cached.conn;

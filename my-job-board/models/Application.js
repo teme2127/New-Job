@@ -1,5 +1,6 @@
 // models/Application.js
 import mongoose from "mongoose";
+import { getModel } from "@/lib/mockDb";
 
 const ApplicationSchema = new mongoose.Schema(
   {
@@ -41,4 +42,5 @@ const ApplicationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.Application || mongoose.model("Application", ApplicationSchema);
+const RealApplication = mongoose.models.Application || mongoose.model("Application", ApplicationSchema);
+export default getModel("Application", RealApplication);

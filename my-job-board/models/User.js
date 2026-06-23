@@ -1,5 +1,5 @@
-// models/User.js
 import mongoose from "mongoose";
+import { getModel } from "@/lib/mockDb";
 
 const UserSchema = new mongoose.Schema(
   {
@@ -34,4 +34,5 @@ const UserSchema = new mongoose.Schema(
 );
 
 // Prevent compiling model query conflicts on Hot Reload
-export default mongoose.models.User || mongoose.model("User", UserSchema);
+const RealUser = mongoose.models.User || mongoose.model("User", UserSchema);
+export default getModel("User", RealUser);

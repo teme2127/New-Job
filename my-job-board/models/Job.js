@@ -1,5 +1,6 @@
 // models/Job.js
 import mongoose from "mongoose";
+import { getModel } from "@/lib/mockDb";
 
 const JobSchema = new mongoose.Schema({
   title: {
@@ -92,4 +93,5 @@ const JobSchema = new mongoose.Schema({
   },
 });
 
-export default mongoose.models.Job || mongoose.model("Job", JobSchema);
+const RealJob = mongoose.models.Job || mongoose.model("Job", JobSchema);
+export default getModel("Job", RealJob);
