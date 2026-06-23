@@ -4,16 +4,33 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ErrorModal from "../../components/ErrorModal";
 
 export default function SignupPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({ name: "", email: "", password: "", role: "candidate" });
   const [submitState, setSubmitState] = useState({ loading: false, error: "", success: false });
   const [verificationSent, setVerificationSent] = useState(false);
+  const [validationError, setValidationError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Client-side validation
+    if (!formData.name.trim()) {
+      setValidationError('Name is required.');
+      return;
+    }
+    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setValidationError('Please enter a valid email address.');
+      return;
+    }
+    if (formData.password.length < 6) {
+      setValidationError('Password must be at least 6 characters.');
+      return;
+    }
     setSubmitState({ loading: true, error: "", success: false });
+    setValidationError("");
 
     try {
       const res = await fetch("/api/auth/signup", {
@@ -85,10 +102,13 @@ export default function SignupPage() {
             )}
 
             {submitState.error && (
-              <div className="bg-red-50 text-red-800 text-xs p-2.5 rounded border border-red-200">
-                {submitState.error}
-              </div>
-            )}
+                <div className="bg-red-50 text-red-800 text-xs p-2.5 rounded border border-red-200">
+                  {submitState.error}
+                </div>
+              )}
+              {validationError && (
+                <ErrorModal message={validationError} onClose={() => setValidationError('')} />
+              )}
 
             {/* Role selector tab */}
             <div>
