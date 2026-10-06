@@ -3,6 +3,7 @@
 
 import { useState, Suspense } from "react";
 import Link from "next/link";
+import ErrorModal from "../../components/ErrorModal";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function LoginFormContent() {
@@ -11,11 +12,23 @@ function LoginFormContent() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [submitState, setSubmitState] = useState({ loading: false, error: "", success: false });
   const [signedUpMsg, setSignedUpMsg] = useState(() => searchParams.get("signup_success") === "true");
+  const [validationError, setValidationError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Client-side validation
+    const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setValidationError('Please enter a valid email address.');
+      return;
+    }
+    if (formData.password.length < 6) {
+      setValidationError('Password must be at least 6 characters.');
+      return;
+    }
     setSubmitState({ loading: true, error: "", success: false });
     setSignedUpMsg(false);
+    setValidationError("");
 
     try {
       const res = await fetch("/api/auth/login", {
@@ -80,10 +93,13 @@ function LoginFormContent() {
             )}
 
             {submitState.error && (
-              <div className="bg-red-50 text-red-800 text-xs p-2.5 rounded border border-red-200">
-                {submitState.error}
-              </div>
-            )}
+                <div className="bg-red-50 text-red-800 text-xs p-2.5 rounded border border-red-200">
+                  {submitState.error}
+                </div>
+              )}
+              {validationError && (
+                <ErrorModal message={validationError} onClose={() => setValidationError('')} />
+              )}
 
             {/* Email */}
             <div>
