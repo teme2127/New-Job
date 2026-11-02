@@ -2,7 +2,7 @@
 import fs from "fs";
 import path from "path";
 
-const DB_FILE = path.join(process.cwd(), "data", "db.json");
+const DB_FILE = path.join(process.cwd(), "data", path.basename(process.env.MOCK_DB_NAME || "db.json"));
 
 // Helper to generate a 24-character hexadecimal string similar to Mongoose ObjectIds
 function generateObjectId() {
@@ -27,8 +27,7 @@ function readDb() {
     const content = fs.readFileSync(DB_FILE, "utf8");
     return JSON.parse(content);
   } catch (e) {
-    console.error("Error reading mock DB:", e);
-    return { users: [], jobs: [], applications: [] };
+    throw e;
   }
 }
 
@@ -41,7 +40,7 @@ function writeDb(data) {
     }
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
   } catch (e) {
-    console.error("Error writing mock DB:", e);
+    throw e;
   }
 }
 

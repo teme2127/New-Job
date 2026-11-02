@@ -108,7 +108,7 @@ export default function PostJobPage() {
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
         </svg>
-        Verifying Session Permissions...
+        Getting your workspace ready…
       </div>
     );
   }
@@ -155,7 +155,7 @@ export default function PostJobPage() {
           Unauthorized Action
         </h1>
         <p className="mt-2 text-xs text-muted leading-relaxed">
-          Your current account is registered as a **Candidate**. Only Employer profiles can publish vacancies.
+          Your account is registered as a candidate. Sign in with an employer account to publish vacancies.
         </p>
         <div className="mt-6 flex justify-center gap-3 text-xs">
           <Link
@@ -204,19 +204,19 @@ export default function PostJobPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-10">
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-extrabold text-foreground tracking-tight">
-          Post a Vacancy Listing
+      <div className="mb-10"><p className="eyebrow mb-4">BUILD YOUR NEXT GREAT TEAM</p>
+        <h1 className="text-4xl font-medium text-foreground tracking-tight">
+          Your next great hire starts here.
         </h1>
-        <p className="mt-1 text-xs text-muted max-w-md mx-auto">
-          Reach thousands of daily Ethiopian professionals, NGO staff, financial analysts, and healthcare workers.
+        <p className="mt-4 text-sm text-muted max-w-xl">
+          Tell the right people about your opportunity. Add the role, requirements, and what makes your team a great place to work.
         </p>
       </div>
 
       {errorMsg && (
-        <div className="mb-6 rounded-lg bg-red-50 border border-red-150 p-3.5 flex gap-2 text-xs text-red-800">
+        <div className="mb-6 rounded-lg bg-red-50 border border-red-100 p-3.5 flex gap-2 text-xs text-red-800">
           <span className="font-bold">⚠️</span>
-          <p>{errorMsg}</p>
+          <p role="alert">{errorMsg}</p>
         </div>
       )}
 
@@ -225,7 +225,7 @@ export default function PostJobPage() {
         {/* Section 1: Role Information */}
         <div>
           <h3 className="text-sm font-bold text-foreground border-b border-border pb-2 mb-4">
-            1. General Vacancy Info
+            01  /  The opportunity
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -286,7 +286,7 @@ export default function PostJobPage() {
         {/* Section 2: Job Settings & Compensation */}
         <div>
           <h3 className="text-sm font-bold text-foreground border-b border-border pb-2 mb-4">
-            2. Settings & Compensation
+            02  /  Location & compensation
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -383,7 +383,7 @@ export default function PostJobPage() {
         {/* Section 3: Descriptions */}
         <div>
           <h3 className="text-sm font-bold text-foreground border-b border-border pb-2 mb-4">
-            3. Vacancy Details & Specifications
+            03  /  The day-to-day
           </h3>
 
           <div className="space-y-4">
@@ -468,7 +468,7 @@ export default function PostJobPage() {
         {/* Section 4: Company Information */}
         <div>
           <h3 className="text-sm font-bold text-foreground border-b border-border pb-2 mb-4">
-            4. Contact Details
+            04  /  Stay connected
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

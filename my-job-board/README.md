@@ -1,36 +1,27 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# EthioWork backend
 
-## Getting Started
+Next.js route handlers and Mongoose provide the backend in this project.
 
-First, run the development server:
+## Run locally
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Install dependencies with `npm ci`. Copy `.env.example` to `.env.local`, set a real MongoDB URI, and generate a random SESSION_SECRET (at least 32 characters). Run `npm run dev`.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+For development without MongoDB, explicitly set USE_MOCK_DB=true. This uses data/db.json and is disabled in production. SEED_DEMO_JOBS=true inserts demo listings only into an empty development database. Normal requests never delete existing jobs.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## APIs
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- POST /api/auth/signup: name, email, password (6+ characters), role (candidate or employer).
+- POST /api/auth/login: email and password. Sets an authenticated, expiring HttpOnly session cookie.
+- GET /api/auth/me; POST /api/auth/logout.
+- GET /api/jobs; POST /api/jobs (employers only, ownership set by server).
+- POST /api/applications: jobId, name, email, cvText. Guests and candidates may apply to existing, open jobs.
+- GET /api/applications: signed-in user's applications or applications to their own jobs.
+- PATCH /api/applications/:id: status; only the employer owning the job may update.
 
-## Learn More
+Email delivery and verification are not configured. Signup supports immediate login; the legacy send-verification endpoint returns 501 instead of falsely claiming delivery. Add a mail provider and token storage before requiring verified emails.
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Set MONGODB_URI and SESSION_SECRET in the hosting environment. Production requires MongoDB and HTTPS. Old session cookies are invalid after the session format change; users must log in again. A unique job/email index prevents duplicate applications; remove any existing duplicates before building that index. Apply authentication rate limits at the hosting gateway before exposing a public deployment. The local JSON adapter is for single-process development only.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Run `npm run lint`, `npm run build`, and `npm test` to validate.

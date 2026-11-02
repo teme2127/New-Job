@@ -42,5 +42,7 @@ const ApplicationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+ApplicationSchema.index({ jobId: 1, email: 1 }, { unique: true });
+
 const RealApplication = mongoose.models.Application || mongoose.model("Application", ApplicationSchema);
 export default getModel("Application", RealApplication);

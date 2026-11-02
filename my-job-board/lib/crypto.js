@@ -1,53 +1,36 @@
-// lib/crypto.js
-import crypto from "crypto";
-
-// Hash a password using scryptSync and a generated salt
+import crypto from "node:crypto";
+export const SESSION_SECONDS = 7 * 24 * 60 * 60;
+function sessionKey() {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret || secret.length < 32) throw new Error("SESSION_SECRET must contain at least 32 characters");
+  return crypto.createHash("sha256").update(secret).digest();
+}
 export function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString("hex");
-  const hash = crypto.scryptSync(password, salt, 64).toString("hex");
-  return `${salt}:${hash}`;
+  return `${salt}:${crypto.scryptSync(password, salt, 64).toString("hex")}`;
 }
-
-// Verify password matches stored hashed version
 export function verifyPassword(password, storedPassword) {
-  if (!storedPassword || !storedPassword.includes(":")) return false;
+  if (typeof password !== "string" || typeof storedPassword !== "string") return false;
   const [salt, hash] = storedPassword.split(":");
-  const verifyHash = crypto.scryptSync(password, salt, 64).toString("hex");
-  return hash === verifyHash;
+  if (!salt || !/^[a-f0-9]{128}$/.test(hash || "")) return false;
+  return crypto.timingSafeEqual(Buffer.from(hash, "hex"), crypto.scryptSync(password, salt, 64));
 }
-
-// Encrypt user session payload using aes-256-cbc
-const SECRET_KEY = process.env.SESSION_SECRET || "ethiojobs-super-secret-key-session-2026";
 export function encryptSession(payload) {
-  try {
-    const data = JSON.stringify(payload);
-    const key = crypto.scryptSync(SECRET_KEY, "salt", 32);
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
-    let encrypted = cipher.update(data, "utf8", "hex");
-    encrypted += cipher.final("hex");
-    return `${iv.toString("hex")}:${encrypted}`;
-  } catch (error) {
-    console.error("Encryption failed:", error);
-    return "";
-  }
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv("aes-256-gcm", sessionKey(), iv);
+  const encrypted = Buffer.concat([cipher.update(JSON.stringify({ ...payload, exp: Date.now() + SESSION_SECONDS * 1000 })), cipher.final()]);
+  return [iv, encrypted, cipher.getAuthTag()].map(b => b.toString("base64url")).join(".");
 }
-
-// Decrypt session cookie string
-export function decryptSession(sessionStr) {
+export function decryptSession(token) {
+  const key = sessionKey();
   try {
-    if (!sessionStr) return null;
-    const parts = sessionStr.split(":");
-    if (parts.length !== 2) return null;
-    const [ivHex, encryptedHex] = parts;
-    const key = crypto.scryptSync(SECRET_KEY, "salt", 32);
-    const iv = Buffer.from(ivHex, "hex");
-    const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
-    let decrypted = decipher.update(encryptedHex, "hex", "utf8");
-    decrypted += decipher.final("utf8");
-    return JSON.parse(decrypted);
-  } catch (error) {
-    console.error("Decryption failed:", error);
-    return null;
-  }
+    if (typeof token !== "string" || token.length > 4096) return null;
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const [iv, encrypted, tag] = parts.map(s => Buffer.from(s, "base64url"));
+    const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
+    decipher.setAuthTag(tag);
+    const payload = JSON.parse(Buffer.concat([decipher.update(encrypted), decipher.final()]).toString());
+    return typeof payload.exp === "number" && payload.exp > Date.now() && /^[a-f0-9]{24}$/.test(payload.id) ? payload : null;
+  } catch { return null; }
 }

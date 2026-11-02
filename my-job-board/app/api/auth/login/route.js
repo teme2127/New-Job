@@ -1,65 +1,16 @@
-// app/api/auth/login/route.js
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import { verifyPassword, encryptSession } from "@/lib/crypto";
-
+import { body, text, email, json, failure, ApiError, sessionCookie } from "@/lib/api";
 export async function POST(request) {
   try {
+    const data = await body(request);
+    const address = email(data.email);
+    text(data.password, "password", 1024);
     await dbConnect();
-    const { email, password } = await request.json();
-
-    if (!email || !password) {
-      return new Response(JSON.stringify({ error: "Email and password are required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return new Response(JSON.stringify({ error: "Invalid email or password" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    const isValid = verifyPassword(password, user.password);
-    if (!isValid) {
-      return new Response(JSON.stringify({ error: "Invalid email or password" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    // Encrypt session payload
-    const sessionToken = encryptSession({
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    });
-
-    // Set secure HTTP-only cookie manually in Headers
-    const cookieString = `session=${sessionToken}; Path=/; HttpOnly; Max-Age=${7 * 24 * 60 * 60}; SameSite=Lax`;
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        user: { id: user._id, name: user.name, email: user.email, role: user.role },
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Set-Cookie": cookieString,
-        },
-      }
-    );
-  } catch (error) {
-    console.error("Login error:", error);
-    return new Response(JSON.stringify({ error: "Failed to log in" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+    const user = await User.findOne({ email: address });
+    if (!user || !verifyPassword(data.password, user.password)) throw new ApiError(401, "Invalid email or password");
+    const safeUser = { id: String(user._id), name: user.name, email: user.email, role: user.role };
+    return json({ success: true, user: safeUser }, 200, { "Set-Cookie": sessionCookie(encryptSession({ id: safeUser.id })) });
+  } catch (error) { return failure(error); }
 }

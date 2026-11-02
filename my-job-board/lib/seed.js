@@ -182,13 +182,7 @@ const initialJobs = [
 ];
 
 export async function seedJobs() {
+  if (process.env.SEED_DEMO_JOBS !== "true" || process.env.NODE_ENV === "production") return;
   await dbConnect();
-  // We can delete existing jobs and re-seed to update them to Ethiopian contexts
-  const count = await Job.countDocuments();
-  if (count <= 5) {
-    console.log("Seeding realistic Ethiopian vacancies...");
-    await Job.deleteMany({});
-    await Job.insertMany(initialJobs);
-    console.log("Seeding complete.");
-  }
+  if (await Job.countDocuments() === 0) await Job.insertMany(initialJobs);
 }

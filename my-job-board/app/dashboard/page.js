@@ -11,6 +11,7 @@ export default function DashboardPage() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function initDashboard() {
@@ -33,18 +34,20 @@ export default function DashboardPage() {
         if (appsRes.ok) {
           const appsData = await appsRes.json();
           setApplications(appsData);
-        }
+        } else { setError("We couldn’t load applications. Please refresh to try again."); }
       } catch (err) {
         console.error("Dashboard initialization error:", err);
+        setError("We couldn’t connect. Please refresh to try again.");
       } finally {
         setLoading(false);
       }
     }
     initDashboard();
-  }, []);
+  }, [router]);
 
   const handleUpdateStatus = async (appId, newStatus) => {
     setActionLoading(true);
+    setError("");
     try {
       const res = await fetch(`/api/applications/${appId}`, {
         method: "PATCH",
@@ -59,11 +62,11 @@ export default function DashboardPage() {
         );
       } else {
         const err = await res.json();
-        alert(`Error updating application status: ${err.error || "Please try again."}`);
+        setError(err.error || "Couldn’t update the application. Please try again.");
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to update application status.");
+      setError("Couldn’t update the application. Please try again.");
     } finally {
       setActionLoading(false);
     }
@@ -89,21 +92,23 @@ export default function DashboardPage() {
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
         </svg>
-        Loading Dashboard Panel...
+        Preparing your dashboard…
       </div>
     );
   }
 
+  if (!user) return <section className="container-wide py-20"><div className="empty-state"><h1 className="text-2xl mb-4">Your workspace is waiting.</h1><p>{error || "Sign in to view your applications and next steps."}</p><Link href="/login" className="button button-dark">Sign in to continue</Link></div></section>;
+
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
       {/* Dashboard Top Intro banner */}
-      <div className="bg-white border border-border p-6 rounded-xl shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-[#eaf0e4] border border-border p-8 rounded-xl mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <span className="text-[10px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded capitalize">
             {user.role} Dashboard
           </span>
-          <h1 className="text-xl font-bold text-foreground mt-1">
-            Welcome Back, {user.name}
+          <h1 className="text-3xl font-medium text-foreground mt-3 mb-3 tracking-tight">
+            Your next chapter, {user.name}.
           </h1>
           <p className="text-xs text-muted">
             {user.role === "candidate"
@@ -122,18 +127,24 @@ export default function DashboardPage() {
         )}
       </div>
 
+      {error && <p role="alert" className="notice notice-error mb-6">{error}</p>}
+      <div className="dashboard-metrics">{[
+        { label: user.role === "candidate" ? "Applications sent" : "Applications received", value: applications.length, note: "Every next step, in one place" },
+        { label: "Awaiting review", value: applications.filter(app => app.status === "pending").length, note: "The possibilities ahead" },
+        { label: "Shortlisted", value: applications.filter(app => app.status === "shortlisted").length, note: "Moving in the right direction" },
+      ].map(metric => <div className="metric" key={metric.label}><span>{metric.label}</span><strong>{metric.value}</strong><small>{metric.note}</small></div>)}</div>
       {/* Main Roster Panel */}
       <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
         <div className="p-4 border-b border-border bg-slate-50/50">
           <h2 className="font-extrabold text-foreground text-sm">
-            {user.role === "candidate" ? "My Applied Vacancies" : "Received CV Submissions"}
+            {user.role === "candidate" ? "My applications" : "Your applicants"}
           </h2>
         </div>
 
         {applications.length === 0 ? (
           <div className="text-center py-16 px-4">
             <span className="text-2xl mb-2 block">📭</span>
-            <h3 className="font-bold text-foreground text-sm">No applications recorded yet</h3>
+            <h3 className="font-bold text-foreground text-sm">Your story starts with an application.</h3>
             <p className="text-xs text-muted mt-1 max-w-xs mx-auto">
               {user.role === "candidate"
                 ? "You haven't applied to any job vacancies yet. Visit the directory to start applying."

@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "EthioWork | Ethiopian Vacancy Directory",
-  description: "Browse verified job vacancies in Ethiopia across NGOs, banking institutions, government, and trading organizations. Track applications instantly.",
+  title: "EthioWork | Your next chapter starts here",
+  description: "Discover meaningful opportunities across Ethiopia. Find a role, connect with employers, and take your next career step.",
 };
 
 export default function RootLayout({ children }) {
@@ -25,10 +25,9 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900">
-        <div className="ethiopian-tricolour sticky top-0 z-50"></div>
+      <body className="min-h-full flex flex-col bg-background text-foreground">
         <Navbar />
-        <main className="flex-grow">{children}</main>
+        <main id="main-content" className="flex-grow">{children}</main>
         <Footer />
       </body>
     </html>

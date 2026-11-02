@@ -1,44 +1,14 @@
-// app/jobs/page.js
 import dbConnect from "@/lib/mongodb";
 import Job from "@/models/Job";
+import { presentJob } from "@/lib/jobPresentation";
 import { seedJobs } from "@/lib/seed";
-import { getJobs } from "@/lib/jobsData";
 import JobsSearchPortal from "@/components/JobsSearchPortal";
-
-export const metadata = {
-  title: "Search Vacancies | EthioWork",
-  description: "Browse verified job vacancies in Ethiopia including NGOs, banks, healthcare, and trading sectors with split screen Master-Detail details.",
-};
-
-export default async function JobsPage() {
-  let initialJobs = [];
-
-  try {
-    await dbConnect();
-    await seedJobs();
-    const dbJobs = await Job.find({}).sort({ postedAt: -1 });
-    initialJobs = JSON.parse(JSON.stringify(dbJobs));
-  } catch (error) {
-    console.warn("MongoDB connection failed on JobsPage, using static fallback:", error.message);
-    const fallbackJobs = getJobs();
-    initialJobs = fallbackJobs.map(j => ({ ...j, _id: j.id }));
-  }
-
-  return (
-    <div className="w-full bg-slate-50 min-h-screen">
-      <div className="bg-gradient-to-r from-primary to-secondary text-white py-8 px-4 shadow-sm relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/5"></div>
-        <div className="mx-auto max-w-7xl relative z-10">
-          <h1 className="text-xl font-extrabold sm:text-3xl tracking-tight leading-tight">
-            EthioWork Careers Directory
-          </h1>
-          <p className="text-xs text-emerald-100 mt-1">
-            Browse verified opportunities in NGO, healthcare, finance, distribution, and agriculture sectors in Ethiopia.
-          </p>
-        </div>
-      </div>
-      
-      <JobsSearchPortal initialJobs={initialJobs} />
-    </div>
-  );
+export const dynamic = "force-dynamic";
+export const metadata = { title: "Find your next opportunity | EthioWork", description: "Explore opportunities across Ethiopia. Search by role, company, sector, and location." };
+export default async function JobsPage({ searchParams }) {
+  const params = await searchParams;
+  let jobs = [], loadError = false;
+  try { await dbConnect(); await seedJobs(); jobs = (await Job.find({}).sort({ postedAt: -1 })).map(presentJob); }
+  catch { loadError = true; }
+  return <><section className="page-heading"><div className="container-wide"><p className="eyebrow">POSSIBILITIES START HERE</p><h1>Find work that moves you.</h1><p>A new role. A fresh perspective. Your next opportunity in Ethiopia.</p></div></section>{loadError && <div className="container-wide mt-6"><p role="alert" className="notice notice-error">We couldn’t load vacancies. Please try again later.</p></div>}<JobsSearchPortal key={`${params.q || ""}:${params.category || ""}`} initialJobs={jobs} initialQuery={typeof params.q === "string" ? params.q : ""} initialCategory={typeof params.category === "string" ? params.category : ""} /></>;
 }
