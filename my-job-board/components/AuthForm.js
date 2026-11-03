@@ -13,11 +13,12 @@ export default function AuthForm({ signup = false }) {
     e.preventDefault(); setState({ loading: true, error: "", success: false });
     try {
       const response = await fetch(`/api/auth/${signup ? "signup" : "login"}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
-      const result = await response.json();
+      const result = await response.json().catch(() => null);
+      if (!result) throw new Error(response.ok ? "We received an unexpected response. Please try again." : "The account service returned an unexpected response. Please try again shortly.");
       if (!response.ok) throw new Error(result.error || "Something went wrong. Please try again.");
       setState({ loading: false, error: "", success: true });
       if (!signup) { router.push("/dashboard"); router.refresh(); }
-    } catch (error) { setState({ loading: false, error: error.message || "Unable to connect. Please try again.", success: false }); }
+    } catch (error) { setState({ loading: false, error: error instanceof TypeError ? "We couldn’t reach the account service. Check your internet connection and try again." : error.message || "Unable to connect. Please try again.", success: false }); }
   }
   return <div className="auth-layout"><aside className="auth-aside"><p className="eyebrow">A LITTLE AMBITION GOES A LONG WAY</p><h1>{signup ? <>A fresh start.<br />A world of<br /><em>possibilities.</em></> : <>Your next<br />chapter is<br /><em>waiting.</em></>}</h1><p>Find meaningful work, connect with growing teams, and build a future that feels like you.</p><div className="auth-benefits"><span><Icon name="check" size={17} /> Discover opportunities across Ethiopia</span><span><Icon name="check" size={17} /> Keep your applications in one place</span><span><Icon name="check" size={17} /> Take the next step at your own pace</span></div></aside><section className="auth-main"><div className="auth-form"><p className="eyebrow">{signup ? "LET’S GET YOU STARTED" : "WELCOME BACK"}</p><h2>{signup ? "Create your account" : "Make your next move."}</h2><p className="auth-description">{signup ? "Already have an account? " : "New to EthioWork? "}<Link href={signup ? "/login" : "/signup"}>{signup ? "Sign in" : "Create an account"}</Link></p>
     {state.error && <p role="alert" className="notice notice-error">{state.error}</p>}

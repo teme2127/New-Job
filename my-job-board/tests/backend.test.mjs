@@ -6,7 +6,31 @@ import path from "node:path";
 process.env.SESSION_SECRET = "test-only-secret-0123456789-abcdefghijklmnopqrstuvwxyz";
 process.env.USE_MOCK_DB = "true";
 process.env.NODE_ENV = "test";
+process.env.MOCK_DB_NAME = `test-${randomUUID()}.json`;
 const { hashPassword, verifyPassword, encryptSession, decryptSession } = await import("../lib/crypto.js");
+test("service errors distinguish configuration, authentication and outages without exposing secrets", async () => {
+  const { ServiceError } = await import("../lib/serviceError.js");
+  const { failure, ApiError } = await import("../lib/api.js");
+  const cases = [
+    [new ServiceError("DATABASE_CONFIGURATION", "private-uri"), "DATABASE_CONFIGURATION"],
+    [new ServiceError("SESSION_CONFIGURATION", "private-secret"), "SESSION_CONFIGURATION"],
+    [Object.assign(new Error("private-password"), { code: 18 }), "DATABASE_AUTHENTICATION"],
+    [Object.assign(new Error("private-host"), { name: "MongooseServerSelectionError", cause: { code: 18 } }), "DATABASE_AUTHENTICATION"],
+    [Object.assign(new Error("private-host"), { name: "MongooseServerSelectionError" }), "DATABASE_UNAVAILABLE"],
+    [Object.assign(new Error("private-uri"), { name: "MongoParseError" }), "DATABASE_CONFIGURATION"],
+    [new Error("private-internals"), "SERVICE_UNAVAILABLE"],
+  ];
+  for (const [error, code] of cases) {
+    const response = failure(error);
+    assert.equal(response.status, 503);
+    const result = await response.json();
+    assert.equal(result.code, code);
+    assert.doesNotMatch(JSON.stringify(result), /private-/);
+  }
+  const invalid = failure(new ApiError(401, "Invalid email or password"));
+  assert.equal(invalid.status, 401);
+  assert.equal((await invalid.json()).error, "Invalid email or password");
+});
 test("session authentication, tamper protection, expiry and password hashing", () => {
   const password = hashPassword("correct-password");
   assert.equal(verifyPassword("correct-password", password), true);
@@ -26,7 +50,6 @@ test("session authentication, tamper protection, expiry and password hashing", (
   process.env.SESSION_SECRET = secret;
 });
 test("backend signup, login, posting, applications and ownership", async () => {
-  process.env.MOCK_DB_NAME = `test-${randomUUID()}.json`;
   const file = path.join(process.cwd(), "data", process.env.MOCK_DB_NAME);
   const signup = await import("../app/api/auth/signup/route.js");
   const login = await import("../app/api/auth/login/route.js");
@@ -90,5 +113,8 @@ test("backend signup, login, posting, applications and ownership", async () => {
     const { default: dbConnect } = await import("../lib/mongodb.js");
     await assert.rejects(dbConnect(), /MONGODB_URI/);
     assert.equal(global.useMockDb, false);
+    const unavailable = await signup.POST(request("/api/auth/signup", { name: "Candidate", email: "new@example.com", password: "test-password", role: "candidate" }));
+    assert.equal(unavailable.status, 503);
+    assert.deepEqual(await unavailable.json(), { code: "DATABASE_CONFIGURATION", error: "Account services are not configured yet. Please contact support." });
   } finally { await rm(file, { force: true }); }
 });

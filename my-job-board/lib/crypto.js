@@ -1,8 +1,9 @@
 import crypto from "node:crypto";
+import { ServiceError } from "./serviceError";
 export const SESSION_SECONDS = 7 * 24 * 60 * 60;
 function sessionKey() {
   const secret = process.env.SESSION_SECRET;
-  if (!secret || secret.length < 32) throw new Error("SESSION_SECRET must contain at least 32 characters");
+  if (!secret || secret.length < 32) throw new ServiceError("SESSION_CONFIGURATION", "SESSION_SECRET must contain at least 32 characters");
   return crypto.createHash("sha256").update(secret).digest();
 }
 export function hashPassword(password) {

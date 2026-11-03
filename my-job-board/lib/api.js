@@ -1,6 +1,7 @@
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import { decryptSession, SESSION_SECONDS } from "@/lib/crypto";
+import { serviceFailure } from "./serviceError";
 export class ApiError extends Error {
   constructor(status, message) { super(message); this.status = status; }
 }
@@ -9,8 +10,9 @@ export function failure(error) {
   if (error instanceof ApiError) return json({ error: error.message }, error.status);
   if (error.code === 11000) return json({ error: "A record with these details already exists" }, 409);
   if (error.name === "ValidationError" || error.name === "CastError") return json({ error: "Invalid field values" }, 400);
-  console.error("API failure:", error.message);
-  return json({ error: "Service unavailable. Please try again later." }, 503);
+  const result = serviceFailure(error);
+  console.error("API failure:", result.code);
+  return json(result, 503);
 }
 export async function body(request) {
   const origin = request.headers.get("origin");
