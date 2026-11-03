@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import styles from "./dashboard.module.css";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -87,7 +88,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center text-xs text-muted">
+      <div role="status" className="flex min-h-[60vh] items-center justify-center text-xs text-muted">
         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
@@ -100,9 +101,9 @@ export default function DashboardPage() {
   if (!user) return <section className="container-wide py-20"><div className="empty-state"><h1 className="text-2xl mb-4">Your workspace is waiting.</h1><p>{error || "Sign in to view your applications and next steps."}</p><Link href="/login" className="button button-dark">Sign in to continue</Link></div></section>;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+    <div className={`${styles.dashboard} mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8`}>
       {/* Dashboard Top Intro banner */}
-      <div className="bg-[#eaf0e4] border border-border p-8 rounded-xl mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className={`${styles.intro} bg-[#eaf0e4] border border-border p-8 rounded-xl mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4`}>
         <div>
           <span className="text-[10px] bg-primary/10 text-primary font-bold px-2 py-0.5 rounded capitalize">
             {user.role} Dashboard
@@ -132,9 +133,9 @@ export default function DashboardPage() {
         { label: user.role === "candidate" ? "Applications sent" : "Applications received", value: applications.length, note: "Every next step, in one place" },
         { label: "Awaiting review", value: applications.filter(app => app.status === "pending").length, note: "The possibilities ahead" },
         { label: "Shortlisted", value: applications.filter(app => app.status === "shortlisted").length, note: "Moving in the right direction" },
-      ].map(metric => <div className="metric" key={metric.label}><span>{metric.label}</span><strong>{metric.value}</strong><small>{metric.note}</small></div>)}</div>
+      ].map(metric => <div className={`metric ${styles.metric}`} key={metric.label}><span>{metric.label}</span><strong key={metric.value} className={styles.value}>{metric.value}</strong><small>{metric.note}</small></div>)}</div>
       {/* Main Roster Panel */}
-      <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
+      <div className={`${styles.panel} bg-white border border-border rounded-xl shadow-sm overflow-hidden`}>
         <div className="p-4 border-b border-border bg-slate-50/50">
           <h2 className="font-extrabold text-foreground text-sm">
             {user.role === "candidate" ? "My applications" : "Your applicants"}
@@ -173,8 +174,8 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border text-foreground font-normal">
-                  {applications.map((app) => (
-                    <tr key={app._id} className="hover:bg-slate-50/50">
+                  {applications.map((app, index) => (
+                    <tr key={app._id} className={styles.row} style={{ "--row-delay": `${Math.min(index, 8) * 45}ms` }}>
                       <td className="p-4 font-bold">
                         {app.jobId ? (
                           <Link href={`/jobs/${app.jobId._id}`} className="hover:underline text-primary">
@@ -187,7 +188,7 @@ export default function DashboardPage() {
                       <td className="p-4">{app.jobId ? app.jobId.company : "N/A"}</td>
                       <td className="p-4">{new Date(app.appliedAt).toLocaleDateString()}</td>
                       <td className="p-4">
-                        <span className={`inline-flex items-center rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getStatusBadgeClass(app.status)}`}>
+                        <span key={app.status} className={`${styles.status} inline-flex items-center rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getStatusBadgeClass(app.status)}`}>
                           {app.status}
                         </span>
                       </td>
@@ -198,8 +199,8 @@ export default function DashboardPage() {
             ) : (
               // Employer Cards/Row List View
               <div className="divide-y divide-border">
-                {applications.map((app) => (
-                  <div key={app._id} className="p-5 flex flex-col md:flex-row justify-between gap-4 hover:bg-slate-50/50">
+                {applications.map((app, index) => (
+                  <div key={app._id} className={`${styles.row} p-5 flex flex-col md:flex-row justify-between gap-4`} style={{ "--row-delay": `${Math.min(index, 8) * 45}ms` }}>
                     <div className="space-y-2 max-w-xl">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-bold text-sm text-foreground">{app.name}</span>
@@ -222,7 +223,7 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="flex flex-col items-start md:items-end justify-between gap-3 min-w-[150px]">
-                      <span className={`inline-flex items-center rounded border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getStatusBadgeClass(app.status)}`}>
+                      <span key={app.status} className={`${styles.status} inline-flex items-center rounded border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getStatusBadgeClass(app.status)}`}>
                         {app.status}
                       </span>
 
